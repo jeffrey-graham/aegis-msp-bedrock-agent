@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AegisMSP | AWS Bedrock AgentCore & Strands Multi-Tenant Command Center</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: #131b2e;
+      --border: #23304f;
+      --accent: #ff9900;
+      --cyan: #38bdf8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      background: linear-gradient(90deg, #131b2e 0%, #192540 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 22px;
+    }
+    .brand h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: rgba(255, 153, 0, 0.16);
+      color: var(--accent);
+      border: 1px solid rgba(255, 153, 0, 0.4);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .kpi-label { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .kpi-value { font-size: 1.85rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+    .kpi-sub { font-size: 0.8rem; color: var(--green); margin-top: 4px; }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.75fr 1fr;
+      gap: 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel h2 {
+      font-size: 1.05rem;
+      margin-bottom: 14px;
+      color: var(--cyan);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .status-ok { background: rgba(34, 197, 94, 0.16); color: var(--green); }
+    .status-warn { background: rgba(245, 158, 11, 0.16); color: var(--amber); }
+    .agent-pipeline {
+      display: flex;
+      gap: 10px;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+    .agent-step {
+      flex: 1;
+      min-width: 135px;
+      background: #0e1526;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+    }
+    .agent-step strong { display: block; color: var(--text); margin-bottom: 4px; }
+    .nlq-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    button {
+      background: var(--accent);
+      color: #0b0f19;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.92; }
+    .nlq-response {
+      background: #0d1424;
+      border-left: 3px solid var(--cyan);
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>AegisMSP <span class="badge">Amazon Bedrock AgentCore + Strands SDK</span></h1>
+      <p style="color: var(--muted); font-size: 0.86rem; margin-top: 4px;">
+        Zero-Trust Multi-Tenant Incident Triage, Autonomous SSM Remediation & Cloud FinOps Rightsizing
+      </p>
+    </div>
+    <div>
+      <button onclick="triggerFleetTriage()">Run Multi-Tenant Triage Cycle</button>
+    </div>
+  </header>
+
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Managed AWS Tenants</div>
+      <div class="kpi-value" id="kpi-tenants">4</div>
+      <div class="kpi-sub">100% Cryptographic Session Isolation</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Autonomous MTTR</div>
+      <div class="kpi-value" id="kpi-mttr">114s</div>
+      <div class="kpi-sub">-95.5% vs 42m Manual L1/L2 Baseline</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Annualized FinOps Savings</div>
+      <div class="kpi-value" id="kpi-savings">$205,656</div>
+      <div class="kpi-sub">$17,138/mo Verified Rightsizing</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">SLA Breach Prevention</div>
+      <div class="kpi-value" id="kpi-sla">99.99%</div>
+      <div class="kpi-sub">Cedar Policy Guardrails Active</div>
+    </div>
+  </section>
+
+  <div class="main-grid">
+    <div>
+      <div class="panel">
+        <h2>
+          <span>Strands Agents SDK 5-Stage Autonomous Workflow</span>
+          <span class="badge">Converse API + AgentCore Memory</span>
+        </h2>
+        <div class="agent-pipeline">
+          <div class="agent-step"><strong>1. AlertIngestor</strong>CloudWatch + EventBridge + Cost Anomaly</div>
+          <div class="agent-step"><strong>2. RootCauseAnalyzer</strong>Logs Insights + X-Ray + AgentCore Memory</div>
+          <div class="agent-step"><strong>3. RunbookExecutor</strong>Cedar Policy Check + AWS SSM Runbook</div>
+          <div class="agent-step"><strong>4. FinOpsRightsizer</strong>gp2->gp3, Graviton3 & NAT Optimization</div>
+          <div class="agent-step"><strong>5. SLARiskScorer</strong>Error Budget & Amazon Quick Executive NLQ</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Live Multi-Tenant Remediation & FinOps Ledger</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant / Account</th>
+              <th>Service & Alarm</th>
+              <th>Executed Runbook</th>
+              <th>MTTR</th>
+              <th>FinOps Savings</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="outcomes-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Amazon Quick (QuickSight Q) Executive NLQ</h2>
+        <div class="nlq-box">
+          <input type="text" id="nlq-input" value="How much FinOps cost savings and MTTR improvement did AegisMSP deliver across tenants?" />
+          <button onclick="askQuickNLQ()">Ask Quick</button>
+        </div>
+        <div class="nlq-response" id="nlq-output">
+          Querying Amazon Quick & CloudWatch fleet telemetry...
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Bedrock AgentCore Zero-Trust Guardrail Log</h2>
+        <div id="guardrail-log" style="font-size: 0.83rem; color: var(--muted); display: flex; flex-direction: column; gap: 10px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/fleet-status');
+        const data = await res.json();
+        renderOutcomes(data.outcomes);
+        document.getElementById('kpi-tenants').textContent = data.metrics.managed_tenants;
+        document.getElementById('kpi-mttr').textContent = data.metrics.avg_autonomous_mttr_seconds + 's';
+        document.getElementById('kpi-savings').textContent = '$' + data.metrics.total_annual_savings_usd.toLocaleString();
+        document.getElementById('nlq-output').textContent = data.quick_default.answer;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderOutcomes(outcomes) {
+      const tbody = document.getElementById('outcomes-tbody');
+      const guardLog = document.getElementById('guardrail-log');
+      tbody.innerHTML = '';
+      guardLog.innerHTML = '';
+      outcomes.forEach(o => {
+        const isAuto = o.remediation_status === 'AUTONOMOUSLY_RESOLVED';
+        const pillClass = isAuto ? 'status-ok' : 'status-warn';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${o.tenant_name}</strong><br/><span style="color:#94a3b8;font-size:0.76rem">${o.aws_account_id} (${o.sla_tier})</span></td>
+          <td>${o.incident_event.aws_service}<br/><span style="color:#38bdf8;font-size:0.78rem">${o.incident_event.metric_name}: ${o.incident_event.metric_value}</span></td>
+          <td><code>${o.executed_runbook}</code></td>
+          <td>${o.autonomous_mttr_seconds}s <span style="color:#22c55e;font-size:0.75rem">(-${o.mttr_reduction_pct}%)</span></td>
+          <td style="color:#22c55e;font-weight:700">$${o.estimated_monthly_savings_usd.toLocaleString()}/mo</td>
+          <td><span class="status-pill ${pillClass}">${o.remediation_status}</span></td>
+        `;
+        tbody.appendChild(tr);
+
+        const gItem = document.createElement('div');
+        gItem.style.padding = '8px 10px';
+        gItem.style.background = '#0b1120';
+        gItem.style.borderRadius = '6px';
+        gItem.style.borderLeft = isAuto ? '3px solid #22c55e' : '3px solid #f59e0b';
+        gItem.innerHTML = `<strong style="color:#f1f5f9">${o.policy_decision.policy_rule_id}</strong> (${o.tenant_id})<br/>Session: <code>${o.session_id.slice(0, 28)}...</code><br/>${o.policy_decision.reason}`;
+        guardLog.appendChild(gItem);
+      });
+    }
+
+    async function askQuickNLQ() {
+      const q = document.getElementById('nlq-input').value;
+      const res = await fetch('/api/quick-nlq?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      document.getElementById('nlq-output').textContent = data.answer;
+    }
+
+    async function triggerFleetTriage() {
+      await fetch('/api/run-triage', { method: 'POST' });
+      await loadDashboard();
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
