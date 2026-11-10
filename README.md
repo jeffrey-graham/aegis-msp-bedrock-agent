@@ -25,6 +25,13 @@ Managed Service Providers (MSPs) operate hundreds of isolated customer AWS accou
 
 ---
 
+## 🔍 Simulation vs. AWS Bedrock Execution Disclosure
+
+- **Static GitHub Pages Command Center (`index.html`):** Runs a zero-credential deterministic client-side replay of `aegis_msp.server.execute_fleet_simulation()` so judges can inspect multi-tenant triage outcomes, Cedar-style policy decisions, cross-tenant HMAC isolation blocks, and Amazon Quick NLQ queries directly in the browser without AWS credentials.
+- **Local Python Engine & Server (`src/aegis_msp/`):** Executes the 5-node pipeline (`TenantSessionGuard` HMAC isolation + `MSPPolicyEnforcer` policy rules + `StrandsMSPWorkflow`) in deterministic offline simulation mode by default (`simulation_mode=True`). An optional `boto3` `bedrock-runtime.converse` client path is implemented in `bedrock_agentcore.py` behind `AEGIS_USE_LIVE_BEDROCK=1` + `AWS_ACCESS_KEY_ID` (implemented in code; not exercised against live AWS credentials in static CI).
+
+---
+
 ## Quick Start
 
 ### 1. Run the Unit & Guardrail Verification Suite

@@ -10,14 +10,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from aegis_msp.bedrock_agentcore import (
-    BedrockAgentCoreOrchestrator,
+from aegis_msp.bedrock_agentcore import (  # noqa: E402
     MSPPolicyEnforcer,
     TenantContext,
     TenantSessionGuard,
 )
-from aegis_msp.server import execute_fleet_simulation
-from aegis_msp.strands_workflow import IncidentEvent, build_default_msp_fleet
+from aegis_msp.server import execute_fleet_simulation  # noqa: E402
+from aegis_msp.strands_workflow import build_default_msp_fleet  # noqa: E402
 
 
 class TestAegisMSP(unittest.TestCase):
@@ -133,6 +132,14 @@ class TestAegisMSP(unittest.TestCase):
         self.assertEqual(state["metrics"]["managed_tenants"], 4)
         self.assertEqual(state["metrics"]["autonomously_resolved"], 3)
         self.assertEqual(state["agentcore_telemetry"]["memory_entries_count"], 4)
+
+    def test_static_github_pages_fallback_snapshot_present(self) -> None:
+        root_html = (Path(__file__).resolve().parents[1] / "index.html").read_text(encoding="utf-8")
+        dash_html = (Path(__file__).resolve().parents[1] / "src/aegis_msp/dashboard.html").read_text(encoding="utf-8")
+        self.assertEqual(root_html, dash_html)
+        self.assertIn("STATIC_FLEET_SNAPSHOT", root_html)
+        self.assertIn("IS_LOCAL_PYTHON_SERVER", root_html)
+        self.assertIn("Apex Clearing FinServ", root_html)
 
 
 if __name__ == "__main__":
